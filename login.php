@@ -30,7 +30,12 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows > 0) {
-    echo json_encode(["login" => "success"]);
+    $row = $result->fetch_assoc();
+    echo json_encode([
+        "login" => "success",
+        "id"    => intval($row['id']),
+        "email" => $row['email']
+    ]);
 } else {
     http_response_code(401);
     echo json_encode(["login" => "failed", "message" => "Invalid credentials"]);

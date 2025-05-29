@@ -11,6 +11,7 @@ $input = json_decode(file_get_contents("php://input"), true);
 
 switch ($method) {
     case 'GET':
+        
         if (isset($_GET['id'])) {
             $id = intval($_GET['id']);
             $stmt = $conn->prepare("SELECT * FROM gastroRecipe WHERE id = ?");
@@ -19,6 +20,17 @@ switch ($method) {
             $result = $stmt->get_result();
             $data = $result->fetch_assoc();
             echo json_encode($data ? $data : ["error" => "Recipe not found"]);
+        }   else if (isset($_GET['search'])) {
+            $search = "%" . $_GET['search'] . "%";
+            $stmt = $conn->prepare("SELECT * FROM gastroRecipe WHERE title LIKE ? OR description LIKE ?");
+            $stmt->bind_param("ss", $search, $search);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $data = [];
+            while ($row = $result->fetch_assoc()) {
+                $data[] = $row;
+            }
+            echo json_encode($data);
         } else {
             $result = $conn->query("SELECT * FROM gastroRecipe");
             $accounts = [];
@@ -27,6 +39,7 @@ switch ($method) {
             }
             echo json_encode($accounts);
         }
+        
         break;
 }
 ?>
